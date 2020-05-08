@@ -1,5 +1,5 @@
 """
-Серверное приложение для соединений
+Серверное приложение для соединений, домашнее задание №2. Выполнил Владимир С
 """
 import asyncio
 from asyncio import transports
@@ -22,7 +22,7 @@ class ClientProtocol(asyncio.Protocol):
             # login:User
             if decoded.startswith("login:"):
                 tmp_login = decoded.replace("login:", "").replace("\r\n", "")
-                if self.chk_login(tmp_login):  # если уже такой существует
+                if self.chk_login(tmp_login) or tmp_login == "":  # если уже такой существует или пустой
                     self.transport.write(
                         f"Логин <{tmp_login}> занят,выберите другой!".encode()
                     )
@@ -37,7 +37,7 @@ class ClientProtocol(asyncio.Protocol):
             self.send_message(decoded)
 
     def close_me(self):
-        #тут в дальнейшем будут какие-то проверки перед закрытием
+        # тут в дальнейшем будут какие-то проверки перед закрытием
         self.transport.close()  # закрыть подключение, у сервера себя не удаляем, т.к. сработает connection_made() и там удалится
 
     def send_history(self):
@@ -49,7 +49,7 @@ class ClientProtocol(asyncio.Protocol):
     def send_message(self, message):
         format_string = f"<{self.login}> {message}"
         encoded = format_string.encode()
-        if len(self.server.messages) > 9:
+        if len(self.server.messages) > 9:  # если сообщений больше чем нужно, удаляем одно перед добавлением
             self.server.messages.pop(0)
 
         self.server.messages.append(format_string)
@@ -76,7 +76,7 @@ class ClientProtocol(asyncio.Protocol):
 
 class Server:
     clients: list
-    messages: list  # тут будем хранить историю сообщений
+    messages: list  # тут будем хранить историю сообщений (10 шт)
 
     def __init__(self):
         self.clients = []
